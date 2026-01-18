@@ -1,0 +1,4 @@
+models:
+  default: ollama/llama3:latest
+  smart: vllm/Qwen/Qwen3-14B-AWQ
+  cheap: ollama/gemma3:latest
