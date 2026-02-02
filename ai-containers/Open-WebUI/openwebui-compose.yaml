@@ -8,9 +8,9 @@ services:
     ## Look at docs https://github.com/open-webui/open-webui
     image: ghcr.io/open-webui/open-webui:main
 
-    ## Port to expose on machine
+    ## Port to expose on machine (host 8001, container 3000)
     ports:
-      - 3000:3000
+      - 8001:3000
       
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -22,6 +22,7 @@ services:
     environment:
       - PORT=3000
       - OPENAI_API_BASE_URL=http://localai:8080/v1
+      - OLLAMA_BASE_URL=http://172.17.0.1:11434
 
     networks:
       - localai_ai_network

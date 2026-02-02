@@ -42,3 +42,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Make app-bg PID file
+.app.pid

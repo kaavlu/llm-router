@@ -2,3 +2,5 @@ models:
   default: ollama/llama3:latest
   smart: vllm/Qwen/Qwen3-14B-AWQ
   cheap: ollama/gemma3:latest
+  # Auto router: resolves to default; extend router logic to pick by prompt/load if needed
+  auto: default

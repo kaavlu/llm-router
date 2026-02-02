@@ -19,8 +19,12 @@ router = APIRouter()
 
 # Initialize model registry and router
 _registry_path = Path(__file__).parent.parent / "config" / "model_registry.yaml"
+_registry_path = _registry_path.resolve()  # Make absolute path
+if not _registry_path.exists():
+    raise FileNotFoundError(f"Model registry not found at {_registry_path}")
 _model_registry = ModelRegistry(str(_registry_path))
 _model_router = ModelRouter(_model_registry)
+logger.info(f"Loaded model registry from {_registry_path} with {len(_model_registry._registry)} aliases")
 
 # Global model-to-provider mapping
 # Maps model names to their provider
@@ -140,6 +144,11 @@ async def create_chat_completion(payload: ChatCompletionRequest):
         resolved_model = _model_router.select(payload.model)
         logger.info(f"Resolved model '{payload.model}' to '{resolved_model}'")
         
+        # Debug: verify resolution worked
+        if resolved_model == payload.model and payload.model in ["default", "smart", "cheap", "auto"]:
+            logger.error(f"Model resolution failed! '{payload.model}' was not resolved. Registry keys: {list(_model_registry._registry.keys())}")
+            return {"error": {"message": f"Model alias '{payload.model}' could not be resolved. Check model_registry.yaml.", "type": "invalid_request_error"}}
+        
         # Detect provider before preparing model (we need it for custom_llm_provider)
         provider = _detect_provider(resolved_model)
         if provider is None:
@@ -225,6 +234,12 @@ async def create_chat_completion(payload: ChatCompletionRequest):
         # --- NON-STREAMING PATH ---
         completion_kwargs["stream"] = False
         resp = completion(**completion_kwargs)
+        
+        # Check if LiteLLM returned an error response
+        if hasattr(resp, "error") or (isinstance(resp, dict) and "error" in resp):
+            logger.error(f"LiteLLM returned error: {resp}")
+            return resp  # Return LiteLLM's error format as-is
+        
         return resp
     except Exception as e:
         # Return error for non-streaming requests

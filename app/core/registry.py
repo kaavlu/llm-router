@@ -17,3 +17,17 @@ class ModelRegistry:
         Otherwise return model_name unchanged (passthrough).
         """
         return self._registry.get(model_name, model_name)
+
+    def resolve_full(self, model_name: str) -> str:
+        """
+        Fully resolve aliases (e.g. 'auto' -> 'default' -> 'ollama/llama3:latest').
+        Stops when the result is not an alias. Detects circular aliases.
+        """
+        seen = set()
+        current = model_name
+        while current in self._registry:
+            if current in seen:
+                raise ValueError(f"Circular alias in model registry: {current}")
+            seen.add(current)
+            current = self._registry[current]
+        return current

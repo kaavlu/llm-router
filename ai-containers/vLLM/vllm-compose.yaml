@@ -4,9 +4,11 @@ services:
     image: vllm/vllm-openai:latest
     platform: linux/amd64
 
+    env_file:
+      - .env
+
     command: >
       ${MODEL_NAME}
-      --quantization ${QUANTIZATION}
       --tensor-parallel-size ${TENSOR_PARALLEL_SIZE}
       --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION}
       --max-num-seqs ${MAX_NUM_SEQS}
@@ -26,7 +28,7 @@ services:
       - /home/manavk/robotf-ai-suite/models:/models
 
     ports:
-      - 8000:8000
+      - 8002:8000
 
     deploy:
       resources:

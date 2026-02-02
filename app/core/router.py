@@ -5,4 +5,5 @@ class ModelRouter:
         self.registry = registry
 
     def select(self, requested_model: str) -> str:
-        return self.registry.resolve(requested_model)
+        """Resolve alias to concrete model (e.g. auto -> default -> ollama/llama3:latest)."""
+        return self.registry.resolve_full(requested_model)
